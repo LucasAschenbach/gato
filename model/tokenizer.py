@@ -12,7 +12,7 @@ Classes:
 """
 
 import torch
-from transformers import PreTrainedTokenizerFast
+import sentencepiece as spm
 
 class Tokenizer:
     def __init__(self):
@@ -82,39 +82,18 @@ class ContinuousTokenizer(Tokenizer):
 
 
 class TextTokenizer:
-    def __init__(self, vocabulary_path, vocabulary_size):
+    def __init__(self, spm_model_path, vocabulary_size):
         super().__init__()
         self.vocabulary_size = vocabulary_size
-        self.vocabulary = self._load_vocabulary(vocabulary_path)
-        if len(self.vocabulary) > self.vocabulary_size:
-            raise ValueError(f"Vocabulary size exceeds the limit of {self.vocabulary_size}.")
-        self.token_to_value = {i: token for i, token in enumerate(self.vocabulary)}
-        self.value_to_token = {token: i for i, token in enumerate(self.vocabulary)}
-        self.hf_tokenizer = PreTrainedTokenizerFast(
-            vocab=self.value_to_token,
-            unk_token="[UNK]"
-        )
-
-    def _load_vocabulary(self, vocabulary_path):
-        with open(vocabulary_path, "r") as f:
-            return [line.strip() for line in f.readlines() if line.strip()]
+        self.sp = spm.SentencePieceProcessor(model_file=spm_model_path)
+        if self.sp.get_piece_size() != vocabulary_size:
+            raise ValueError(f"Vocabulary size mismatch: expected {vocabulary_size}, got {self.sp.get_piece_size()}")
 
     def tokenize(self, text):
-        if isinstance(text, str):
-            tokens = self.hf_tokenizer.encode(text, return_tensors="pt")[0]
-        else: # Handle batch of texts
-            encoded = self.hf_tokenizer(text, padding=True, return_tensors="pt")
-            tokens = encoded.input_ids
-        return tokens
+        return self.sp.encode(text, out_type=int)
 
     def detokenize(self, tokens):
-        if isinstance(tokens, torch.Tensor):
-            tokens = tokens.tolist()
-        if isinstance(tokens[0], list):
-            decoded = [self.hf_tokenizer.decode(token) for token in tokens]
-        else:
-            decoded = self.hf_tokenizer.decode(tokens)
-        return decoded
+        return self.sp.decode(tokens)
 
 
 class ImageTokenizer:
