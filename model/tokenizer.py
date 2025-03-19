@@ -86,7 +86,7 @@ class TextTokenizer:
         super().__init__()
         self.vocabulary_size = vocabulary_size
         self.sp = spm.SentencePieceProcessor(model_file=spm_model_path)
-        if self.sp.get_piece_size() != vocabulary_size:
+        if self.sp.get_piece_size() > vocabulary_size:
             raise ValueError(f"Vocabulary size mismatch: expected {vocabulary_size}, got {self.sp.get_piece_size()}")
 
     def tokenize(self, text):
