@@ -82,18 +82,19 @@ class ContinuousTokenizer(Tokenizer):
 
 
 class TextTokenizer:
-    def __init__(self, spm_model_path, vocabulary_size):
+    def __init__(self, spm_model_path, vocabulary_size, offset=0):
         super().__init__()
         self.vocabulary_size = vocabulary_size
+        self.offset = offset
         self.sp = spm.SentencePieceProcessor(model_file=spm_model_path)
         if self.sp.get_piece_size() > vocabulary_size:
             raise ValueError(f"Vocabulary size mismatch: expected {vocabulary_size}, got {self.sp.get_piece_size()}")
 
     def tokenize(self, text):
-        return self.sp.encode(text, out_type=int)
+        return self.sp.encode(text, out_type=int) + self.offset
 
     def detokenize(self, tokens):
-        return self.sp.decode(tokens)
+        return self.sp.decode(tokens - self.offset)
 
 
 class ImageTokenizer:
