@@ -37,22 +37,21 @@ class ResidualBlock(nn.Module):
 class ImageEmbedding(Embedding):
     def __init__(self, embedding_dim: int, num_group_norm_groups: int, layer_width: int):
         super().__init__(embedding_dim)
-        self.embedding_dim = embedding_dim
         self.num_group_norm_groups = num_group_norm_groups
         self.layer_width = layer_width
 
-        self.input_channels = 3
-        self.root_channels = 96
+        input_channels = 3
+        root_channels = 96
         self.resnet_root = nn.Sequential(
-            nn.Conv2d(self.input_channels, self.root_channels, kernel_size=7, stride=2, padding=3),
-            nn.GroupNorm(num_group_norm_groups, self.root_channels),
+            nn.Conv2d(input_channels, root_channels, kernel_size=7, stride=2, padding=3),
+            nn.GroupNorm(num_group_norm_groups, root_channels),
             nn.GELU(),
         )
 
         self.resnet_blocks = [
-            ResidualBlock(num_group_norm_groups, self.root_channels * 2),
-            ResidualBlock(num_group_norm_groups, self.root_channels * 4),
-            ResidualBlock(num_group_norm_groups, self.root_channels * 8), # == embedding_dim
+            ResidualBlock(num_group_norm_groups, root_channels * 2),
+            ResidualBlock(num_group_norm_groups, root_channels * 4),
+            ResidualBlock(num_group_norm_groups, root_channels * 8), # == embedding_dim
         ]
 
     def forward(self, x):
