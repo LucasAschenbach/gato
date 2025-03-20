@@ -1,9 +1,11 @@
 """
 Module description:
 -------------------
-This module defines the Embedding classes for different modalities, including
-- StructuredDataEmbedding: Lookup table based embedding for structured data.
-- ImageEmbedding: ResNet based embedding for images.
+This module defines the Embedding class and its subclasses for different modalities.
+
+Classes:
+    - StructuredDataEmbedding: Lookup table based embedding for structured data.
+    - ImageEmbedding: ResNet based embedding for images.
 """
 
 import torch
