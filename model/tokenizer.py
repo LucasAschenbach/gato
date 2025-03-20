@@ -110,7 +110,7 @@ class ImageTokenizer:
         patches = unfold(images)  # shape: (B, C * patch_size * patch_size, L)
         L = patches.shape[-1]
         patches = patches.transpose(1, 2).reshape(B, L, C, patch_size, patch_size)
-        return patches
+        return patches / torch.sqrt(patch_size)
 
     def detokenize(self, tokens):
         B, L, C, patch_size, _ = tokens.shape
@@ -118,4 +118,4 @@ class ImageTokenizer:
         H = W = int((L * patch_size) ** 0.5)
         fold = torch.nn.Fold(output_size=(H, W), kernel_size=patch_size, stride=patch_size)
         images = fold(patches)
-        return images.reshape(B, C, H, W)
+        return images.reshape(B, C, H, W) * torch.sqrt(patch_size)
