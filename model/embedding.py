@@ -1,3 +1,11 @@
+"""
+Module description:
+-------------------
+This module defines the Embedding classes for different modalities, including
+- StructuredDataEmbedding: Lookup table based embedding for structured data.
+- ImageEmbedding: ResNet based embedding for images.
+"""
+
 import torch
 import torch.nn as nn
 from transformers import ResNetModel
@@ -8,6 +16,17 @@ class Embedding(nn.Module):
 
     def forward(self, x):
         raise NotImplementedError("Subclasses should implement this method.")
+
+
+class StructuredDataEmbedding(Embedding):
+    def __init__(self, embedding_dim: int, num_embeddings: int):
+        super().__init__(embedding_dim)
+        self.embedding = nn.Embedding(num_embeddings, embedding_dim)
+
+    def forward(self, x):
+        x = x.long()
+        x = self.embedding(x)
+        return x
 
 
 class ResidualBlock(nn.Module):
