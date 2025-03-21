@@ -5,7 +5,7 @@ This module defines the Embedding class and its subclasses for different modalit
 
 Classes:
     - StructuredDataEmbedding: Lookup table based embedding for structured data.
-    - ImageEmbedding: ResNet based embedding for images.
+    - ImagePatchEmbedding: ResNet based embedding for image patches.
 """
 
 import torch
@@ -31,7 +31,7 @@ class StructuredDataEmbedding(Embedding):
         return x
 
 
-class ResidualBlock(nn.Module):
+class _ResidualBlock(nn.Module):
     def __init__(self, num_group_norm_groups: int, num_channels: int):
         super().__init__()
         self.num_group_norm_groups = num_group_norm_groups
@@ -55,7 +55,7 @@ class ResidualBlock(nn.Module):
         return x
 
 
-class ImageEmbedding(Embedding):
+class ImagePatchEmbedding(Embedding):
     def __init__(self, embedding_dim: int, num_group_norm_groups: int, layer_width: int):
         super().__init__(embedding_dim)
         self.num_group_norm_groups = num_group_norm_groups
@@ -70,9 +70,9 @@ class ImageEmbedding(Embedding):
         )
 
         self.resnet_blocks = [
-            ResidualBlock(num_group_norm_groups, root_channels * 2),
-            ResidualBlock(num_group_norm_groups, root_channels * 4),
-            ResidualBlock(num_group_norm_groups, root_channels * 8), # == embedding_dim
+            _ResidualBlock(num_group_norm_groups, root_channels * 2),
+            _ResidualBlock(num_group_norm_groups, root_channels * 4),
+            _ResidualBlock(num_group_norm_groups, root_channels * 8), # == embedding_dim
         ]
 
     def forward(self, x):
